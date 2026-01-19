@@ -234,7 +234,9 @@ def create_interruption_handler(
         # Decision based on classification
         if intent == InterruptionIntent.IGNORE_BACKCHANNEL:
             logger.info(f"IGNORING backchannel while speaking: '{transcript}'")
-            # Do nothing - let agent continue speaking
+            # Clear the user turn to prevent the system from trying to respond
+            if is_final:
+                session.clear_user_turn()
             return
 
         elif intent in (InterruptionIntent.INTERRUPT_COMMAND, InterruptionIntent.INTERRUPT_OTHER):
@@ -336,9 +338,6 @@ async def entrypoint(ctx: JobContext) -> None:
         # CRITICAL: Keep processing audio even when agent is speaking!
         # This allows us to capture and classify user speech during agent output
         discard_audio_if_uninterruptible=False,
-        # Noise reduction settings
-        min_interruption_duration=0.8,  # Require 0.8s of speech (up from 0.5s) to filter noise
-        min_interruption_words=1,  # Require at least 1 word to be recognized
         # Other settings
         preemptive_generation=True,
         min_endpointing_delay=0.5,
