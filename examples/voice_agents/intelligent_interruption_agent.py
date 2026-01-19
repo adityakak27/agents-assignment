@@ -116,7 +116,10 @@ class IntelligentInterruptionAgent(Agent):
                 "Keep responses SHORT and CONCISE - aim for 2-3 sentences maximum. "
                 "For stories, give a brief 3-4 sentence summary instead of a full story. "
                 "Keep your tone friendly and conversational. "
-                "Do not use emojis, asterisks, markdown, or special characters."
+                "Do not use emojis, asterisks, markdown, or special characters. "
+                "IMPORTANT: If a user pauses you mid-story and later asks to continue or resume, "
+                "pick up EXACTLY where you left off in the story. You can see what you already said "
+                "in the conversation history - continue from that point, don't start over."
             ),
         )
 
@@ -239,11 +242,23 @@ def create_interruption_handler(
                 session.clear_user_turn()
             return
 
-        elif intent in (InterruptionIntent.INTERRUPT_COMMAND, InterruptionIntent.INTERRUPT_OTHER):
-            logger.info(
-                f"INTERRUPTING due to {intent.value}: '{transcript}'"
-            )
+        elif intent == InterruptionIntent.INTERRUPT_COMMAND:
+            logger.info(f"INTERRUPTING due to command: '{transcript}'")
             # Force interrupt the current speech
+            try:
+                session.interrupt(force=True)
+                logger.info("Successfully interrupted agent speech")
+                # Clear the user turn so the command itself doesn't trigger a response
+                # (we don't want the agent to respond to "hold on" or "stop")
+                if is_final:
+                    session.clear_user_turn()
+            except RuntimeError as e:
+                logger.warning(f"Could not interrupt: {e}")
+
+        elif intent == InterruptionIntent.INTERRUPT_OTHER:
+            logger.info(f"INTERRUPTING due to new content: '{transcript}'")
+            # Force interrupt the current speech - but DON'T clear the turn
+            # because this is legitimate new content the user wants to discuss
             try:
                 session.interrupt(force=True)
                 logger.info("Successfully interrupted agent speech")
