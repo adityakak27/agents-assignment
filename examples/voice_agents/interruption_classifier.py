@@ -17,6 +17,8 @@ class InterruptionClassifierConfig:
     backchannel_words: Set[str] = field(
         default_factory=lambda: {
             "yeah",
+            "alright",
+            "i see",
             "yes",
             "yep",
             "yup",
