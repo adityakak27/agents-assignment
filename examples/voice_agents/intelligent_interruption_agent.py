@@ -85,7 +85,6 @@ _latency_tracker = defaultdict(lambda: {"start": None, "events": []})
 
 
 def log_latency(stage: str, event: str, details: str = "") -> None:
-    """Log latency events with timestamps."""
     now = time.time()
     tracker = _latency_tracker[stage]
     
@@ -113,8 +112,7 @@ class IntelligentInterruptionAgent(Agent):
         super().__init__(
             instructions=(
                 "Your name is Kelly. You are a helpful voice assistant. "
-                "Keep responses SHORT and CONCISE - aim for 2-3 sentences maximum. "
-                "For stories, give a brief 3-4 sentence summary instead of a full story. "
+                "For stories, give an entertaining story to the user, based on their request. "
                 "Keep your tone friendly and conversational. "
                 "Do not use emojis, asterisks, markdown, or special characters. "
                 "IMPORTANT: If a user pauses you mid-story and later asks to continue or resume, "
@@ -131,7 +129,6 @@ class IntelligentInterruptionAgent(Agent):
         )
     
     async def on_user_turn_completed(self, turn_ctx: ChatContext, new_message: ChatMessage) -> None:
-        """Called when user finishes speaking - log LLM request start."""
         log_latency("LLM", "REQUEST STARTED", f"Processing user message")
         # Use the text_content property which correctly extracts text from the message
         text = new_message.text_content
@@ -302,7 +299,7 @@ async def entrypoint(ctx: JobContext) -> None:
             "mm-hmm", "mm hmm", "mmhmm",
             "right", "sure", "alright", "yessir",
             "ah", "oh",
-            "i see", "got it", "gotcha",
+            "i see", "got it", "gotcha", "haan", "accha", "theek hai", "samajh gaya", "samajh gayi"
         },
         command_phrases={
             "stop", "wait", "no", "cancel",
@@ -310,6 +307,7 @@ async def entrypoint(ctx: JobContext) -> None:
             "quiet", "shut up", "enough",
             "never mind", "nevermind",
             "actually", "but",
+            "nahi", "ruko", "bas bas"
         },
         interrupt_on_non_backchannel=True,
     )
@@ -321,14 +319,14 @@ async def entrypoint(ctx: JobContext) -> None:
     tts_instance = deepgram.TTS(model="aura-2-andromeda-en")
     
     print(f"\n{'*'*60}")
-    print(f"🧠 LLM PROVIDER: {llm_instance.provider}")
-    print(f"🧠 LLM MODEL: {llm_instance.model}")
-    print(f"🎤 STT PROVIDER: Deepgram")
-    print(f"🎤 STT MODEL: {stt_instance.model if hasattr(stt_instance, 'model') else 'nova-3'}")
-    print(f"🔊 TTS PROVIDER: Deepgram")
-    print(f"🔊 TTS MODEL: {tts_instance.model if hasattr(tts_instance, 'model') else 'aura-2-andromeda-en'}")
+    print(f"LLM PROVIDER: {llm_instance.provider}")
+    print(f"LLM MODEL: {llm_instance.model}")
+    print(f"STT PROVIDER: Deepgram")
+    print(f"STT MODEL: {stt_instance.model if hasattr(stt_instance, 'model') else 'nova-3'}")
+    print(f"TTS PROVIDER: Deepgram")
+    print(f"TTS MODEL: {tts_instance.model if hasattr(tts_instance, 'model') else 'aura-2-andromeda-en'}")
     print(f"{'*'*60}\n")
-    print("⏱️  LATENCY TRACKING ENABLED - All events will be logged with timestamps\n")
+    print("LATENCY TRACKING ENABLED - All events will be logged with timestamps\n")
 
     # Create the agent session with interruptions DISABLED by default
     # We will handle interruptions manually via the classifier
