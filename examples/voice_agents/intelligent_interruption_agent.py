@@ -99,7 +99,7 @@ class IntelligentInterruptionAgent(Agent):
         super().__init__(
             instructions=(
                 "Your name is Kelly. You are a helpful voice assistant. "
-                "For stories, give an entertaining story to the user, based on their request. "
+                "For stories, give an entertaining story to the user, based on their request. Keep it semi short, but not 4-5 lines, and not too long either. "
                 "Keep your tone friendly and conversational. "
                 "Do not use emojis, asterisks, markdown, or special characters. "
                 "IMPORTANT: If a user pauses you mid-story and later asks to continue or resume, "
